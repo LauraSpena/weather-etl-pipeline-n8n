@@ -1,0 +1,307 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a97cb479-0ae0-43d7-bd71-32eda4d6a770",
+      "name": "Iniciar actualización de clima"
+    },
+    {
+      "parameters": {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=-31.4201&longitude=-64.1888&start_date=2025-01-08&end_date=2025-01-10&daily=temperature_2m_mean,temperature_2m_max,temperature_2m_min,shortwave_radiation_sum,cloud_cover_mean,wind_speed_10m_mean&timezone=America%2FArgentina%2FCordoba",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "7aaf5a35-fabd-462c-b2d5-1fbf4858d560",
+      "name": "Obtener datos meteorológicos - OpenMeteo"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1yjevwYjoxRDFHTw5MxGiqOevs5_p3XMM0mNB7FiIwKI",
+          "mode": "list",
+          "cachedResultName": "Renewable_Energy_Dataset_Model",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yjevwYjoxRDFHTw5MxGiqOevs5_p3XMM0mNB7FiIwKI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1562806697,
+          "mode": "list",
+          "cachedResultName": "Fact_Weather_API",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yjevwYjoxRDFHTw5MxGiqOevs5_p3XMM0mNB7FiIwKI/edit#gid=1562806697"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "DateKey",
+              "displayName": "DateKey",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LocationID",
+              "displayName": "LocationID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Temperature_Mean_C",
+              "displayName": "Temperature_Mean_C",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Temperature_Max_C",
+              "displayName": "Temperature_Max_C",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Temperature_Min_C",
+              "displayName": "Temperature_Min_C",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "SolarIrradiance_MJ_m2",
+              "displayName": "SolarIrradiance_MJ_m2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CloudCover_pct",
+              "displayName": "CloudCover_pct",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "WindSpeed_kmh",
+              "displayName": "WindSpeed_kmh",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Source",
+              "displayName": "Source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LoadDate",
+              "displayName": "LoadDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "e016c426-4a25-4e0a-b3aa-cf658ac03b0d",
+      "name": "Adjuntar filas meteorológicas",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "iqwu2tfsuIdL1VWP",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst daily = input.daily;\n\nconst rows = daily.time.map((date, index) => {\n  const dateKey = Number(date.replaceAll(\"-\", \"\"));\n\n  return {\n    json: {\n      Date: date,\n      DateKey: dateKey,\n      LocationID: 1,\n      Temperature_Mean_C: daily.temperature_2m_mean[index],\n      Temperature_Max_C: daily.temperature_2m_max[index],\n      Temperature_Min_C: daily.temperature_2m_min[index],\n      SolarIrradiance_MJ_m2: daily.shortwave_radiation_sum[index],\n      CloudCover_pct: daily.cloud_cover_mean[index],\n      WindSpeed_kmh: daily.wind_speed_10m_mean[index],\n      Source: \"Open-Meteo API\",\n      LoadDate: new Date().toISOString()\n    }\n  };\n});\n\nreturn rows;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "9de87299-4335-47b2-a0f7-444b8d6d6af6",
+      "name": "Transformar en filas"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1yjevwYjoxRDFHTw5MxGiqOevs5_p3XMM0mNB7FiIwKI",
+          "mode": "list",
+          "cachedResultName": "Renewable_Energy_Dataset_Model",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yjevwYjoxRDFHTw5MxGiqOevs5_p3XMM0mNB7FiIwKI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1562806697,
+          "mode": "list",
+          "cachedResultName": "Fact_Weather_API",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yjevwYjoxRDFHTw5MxGiqOevs5_p3XMM0mNB7FiIwKI/edit#gid=1562806697"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        592,
+        -112
+      ],
+      "id": "1c2c3e9b-7d47-4275-bdab-c3c7e5b96ca2",
+      "name": "Leer fechas existentes",
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "iqwu2tfsuIdL1VWP",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const newRows = $(\"Transformar en filas\").all();\nconst existingRows = $(\"Leer fechas existentes\").all();\n\nconst existingDates = new Set(\n  existingRows.map(item => item.json.Date)\n);\n\nconst filteredRows = newRows.filter(item => {\n  return !existingDates.has(item.json.Date);\n});\n\nreturn filteredRows;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        784,
+        0
+      ],
+      "id": "862fb744-cfdc-4e19-9826-1b4dad771a38",
+      "name": "Filtrar nuevas fechas"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Iniciar actualización de clima": {
+      "main": [
+        [
+          {
+            "node": "Obtener datos meteorológicos - OpenMeteo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener datos meteorológicos - OpenMeteo": {
+      "main": [
+        [
+          {
+            "node": "Transformar en filas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transformar en filas": {
+      "main": [
+        [
+          {
+            "node": "Leer fechas existentes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filtrar nuevas fechas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer fechas existentes": {
+      "main": [
+        [
+          {
+            "node": "Filtrar nuevas fechas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar nuevas fechas": {
+      "main": [
+        [
+          {
+            "node": "Adjuntar filas meteorológicas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8218b5c5-0e2d-4155-89b2-df5b139b6cb2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "65ad723581b1cf79e4da0036fa0a947486b5f2a223f7c21d122cfb3815f03431"
+  },
+  "id": "VbEXB7DfapF5OZWX",
+  "tags": []
+}
